@@ -9,44 +9,36 @@ public class ApproxPageRank {
     private static double epsilon = 0.00001;
     private static String seed;
     private static String path;
-    private static Map<String, Double> p; // p vector
-    private static Map<String, Double> r; // r vector
+    private static Map<String, Double> p;
+    private static Map<String, Double> r;
+
+    private static void update(String key, double ru, double weight) {
+        if (r.containsKey(key)) {
+            r.put(key, r.get(key) + (1 - alpha) * ru * weight);
+        } else {
+            r.put(key, (1 - alpha) * ru * weight);
+        }
+    }
 
     private static void push(String[] tokens) {
         String ukey = tokens[0];
 
-        int len = tokens.length;
-        int outdegree = len - 1;
-        final double ru = r.get(ukey);
+        double outdegree = tokens.length - 1;
+        double ru = r.get(ukey);
 
-        // 1. p' = p + alpha*ru
         if (p.containsKey(ukey)) {
             p.put(ukey, p.get(ukey) + alpha * ru);
         } else {
             p.put(ukey, alpha * ru);
         }
 
-        // 2. r' = r - ru + (1 - alpha) * ru * W;
         if (r.containsKey(ukey)) {
             r.remove(ukey);
         }
 
-        double selfweight = 1.0 / 2.0;
-        if (r.containsKey(ukey)) {
-            r.put(ukey, r.get(ukey) + (1 - alpha) * ru * selfweight);
-        } else {
-            r.put(ukey, (1 - alpha) * ru * selfweight);
-        }
-
-        for (int i = 1; i < len; i++) {
-            String vkey = tokens[i];
-            double vweight = 1.0 / ( 2.0 * (double) outdegree);
-
-            if (r.containsKey(vkey)) {
-                r.put(vkey, r.get(vkey) + (1 - alpha) * ru * vweight);
-            } else {
-                r.put(vkey, (1 - alpha) * ru * vweight);
-            }
+        update(ukey, ru, 1.0 / 2.0);
+        for (int i = 1; i < tokens.length; i++) {
+            update(tokens[i], ru, 1.0 / (2.0 * outdegree));
         }
     }
 
@@ -74,10 +66,9 @@ public class ApproxPageRank {
 
                 if (r.containsKey(ukey)) {
                     double ru = r.get(ukey);
-                    int len = tokens.length;
-                    int outdegree = len - 1;
+                    double outdegree = tokens.length - 1;
 
-                    if (outdegree == 0 || ru / (double) outdegree <= epsilon) {
+                    if (outdegree == 0 || (ru / outdegree) <= epsilon) {
                         continue;
                     }
 
