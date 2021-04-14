@@ -1,0 +1,47 @@
+<project default="build" basedir=".">
+
+  <property name="version">1.0.0</property>
+  <property name="dir.src" value="src" />
+  <property name="dir.build" value="build" />
+  <property name="dir.build.class" value="${dir.build}/class" />
+  <property name="train.jar">${dir.build}/Train-${version}.jar</property>
+  <property name="test.jar">${dir.build}/Test-${version}.jar</property>
+
+  <target name="init">
+      <mkdir dir="${dir.build}"/>
+      <mkdir dir="${dir.build.class}"/>
+  </target>
+
+  <target name="compile" depends="init">
+    <javac srcdir="${dir.src}"
+           destdir="${dir.build.class}"
+          />
+  </target>
+
+  <target name="jar" depends="compile">
+        <echo>Making JAR file</echo>
+        <jar basedir="${dir.build.class}" destfile="${train.jar}" >
+           <manifest>
+              <attribute name="Main-Class" value="com.count.NBTrain"/>
+            </manifest> 
+        </jar>
+
+        <jar basedir="${dir.build.class}" destfile="${test.jar}" >
+           <manifest>
+              <attribute name="Main-Class" value="com.test.NBTest"/>
+            </manifest> 
+        </jar>
+    </target>
+
+  <target name="build" depends="clean, jar">
+    <echo>My First Ant Project!</echo>
+  </target>
+
+  <target name="clean">
+    <echo>I am cleaning</echo>
+    <delete verbose="true">
+        <fileset dir="${dir.build}" />
+    </delete>
+  </target>
+
+</project>
